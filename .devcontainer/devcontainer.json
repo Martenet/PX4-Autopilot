@@ -1,15 +1,17 @@
-// For format details, see https://aka.ms/vscode-remote/devcontainer.json or this file's README at:
-// https://github.com/microsoft/vscode-dev-containers/tree/v0.134.0/containers/cpp
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.194.0/containers/debian
 {
 	"name": "px4-dev-nuttx",
-	"image": "px4io/px4-dev-nuttx-focal:2021-09-08",
-
-	"runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
+	"build": {
+		"dockerfile": "debian.dockerfile",
+		// Update 'VARIANT' to pick an Debian version: bullseye, buster, stretch
+		"args": { "VARIANT": "buster" }
+	},
 
 	// Set *default* container specific settings.json values on container create.
-	"settings": {
-		"terminal.integrated.shell.linux": "/bin/bash"
-	},
+	"settings": {},
+
+	"runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
@@ -32,11 +34,16 @@
 		"zixuanwang.linkerscript"
 	],
 
-	"containerUser": "user",
-	"containerEnv": {
-		"LOCAL_USER_ID": "${localEnv:UID}"
-	},
-
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [14556],
+
+	"onCreateCommand": "bash Tools/setup/debian.sh && wget https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.AppImage -O ~/QGroundControl.AppImage && chmod u+x ~/QGroundControl.AppImage",
+
+	"postCreateCommand": "apt-get update && env DEBIAN_FRONTEND=noninteractive apt-get -y install --no-install-recommends p7zip-full gcc-arm-none-eabi",
+
+	// Uncomment to use the Docker CLI from inside the container. See https://aka.ms/vscode-remote/samples/docker-from-docker.
+	// "mounts": [ "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind" ],
+
+	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "vscode"
 }
